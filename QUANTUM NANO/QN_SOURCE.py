@@ -7,11 +7,13 @@ except ImportError:
  sys.exit()
 class QN(ShowBase):
  def __init__(s):
-  print("LOADING")
   ShowBase.__init__(s)
+  s.setFrameRateMeter(True)
   s.disableMouse()
   props=WindowProperties()
   props.setCursorHidden(True)
+  props.setSize(1600,900)
+  props.setTitle("QUANTUM NANO")
   s.win.requestProperties(props)
   s.keymap={}
   for k in "wsadeq":
@@ -19,7 +21,7 @@ class QN(ShowBase):
    s.accept(f"{k}-up",s.set_key,[k,0])
    s.accept("escape",sys.exit)
    s.spd=5
-   s.cam.setPos(8,8,17)
+   s.cam.setPos(32,32,66)
    s.win.movePointer(0,s.win.getXSize()//2,s.win.getYSize()//2)
    s.accept("mouse1",s.center_mouse)
    c=s.loader.loadModel("models/box")
@@ -29,21 +31,23 @@ class QN(ShowBase):
    s.cursor.setScale(0.15)
    s.taskMgr.add(s.update_cursor,"update_cursor")
   if c:
-   T=[[[[a%256,b%256,a^b%256,255]for b in range(256)]for a in range(256)],[[[a%256,b%256,(a+b)%256,255]for b in range(256)]for a in range(256)],[[[a%256,b%256,a*b%256,255]for b in range(256)]for a in range(256)],[[[255,0,0,255]for b in range(256)]for a in range(256)],[[[0,255,255,255]for b in range(256)]for a in range(256)],[[[255,0,255,255]for b in range(256)]for a in range(256)],[[[255,255,255,255]for b in range(256)]for a in range(256)],[[[0,0,0,255]for b in range(256)]for a in range(256)]]
-   for x in range(16):
-    for y in range(16):
-     for z in range(16):
-      if random.randint(1,2) == 1:
+   T=[[[[a%256,b%256,a^b%256,255]for b in range(256)]for a in range(256)],[[[a%256,b%256,(a+b)%256,255]for b in range(256)]for a in range(256)],[[[a%256,b%256,a*b%256,255]for b in range(256)]for a in range(256)],[[[255,0,0,255]for b in range(256)]for a in range(256)],[[[0,255,0,255]for b in range(256)]for a in range(256)],[[[0,0,255,255]for b in range(256)]for a in range(256)],[[[255,255,255,255]for b in range(256)]for a in range(256)]]
+   nT=[]
+   for i in range(7):
+    nT.append(bytes([c for a in T[i] for b in a for c in b]))
+   for x in range(64):
+    for y in range(64):
+     for z in range(64):
+      if random.randint(1,16)==1:
        N=NodePath("N")
        c.copyTo(N)
        N.reparentTo(s.render)
        N.setPos(x,y,z)
        t=Texture()
        t.setup2dTexture(256,256,Texture.TUnsignedByte,Texture.FRgba8)
-       t.setRamImage(bytes([c for a in random.choice(T) for b in a for c in b]))
+       t.setRamImage(random.choice(nT))
        ts=TextureStage("ts")
        N.setTexture(ts,t)
-  print("RUNNING")
   s.taskMgr.add(s.update,"update")
   s.taskMgr.add(s.mouse_control,"mouse_control")
  def set_key(s,key,value):
